@@ -10,7 +10,7 @@ import pandas as pd
 # importing classification module
 from pycaret.classification import load_model, predict_model
 
-loadedModel = load_model('saved_lr_model') 
+
 
 
 # The flask app for serving predictions
@@ -28,20 +28,17 @@ def transformation():
     
     #Process input
     input_json = flask.request.get_json()
-    df = pd.DataFrame.from_dict(input_json, orient='index')
+    print(input_json)
+    loadedModel = load_model('saved_models/iforest'+str(input_json['user']['user_segment'])+'_pipeline') 
+    df = pd.DataFrame.from_dict([input_json['transaction']])
     print(df)
     
     #NER
     results = predict_model(loadedModel, data=df)
     results = results.to_json(orient="index")
     parsed = json.loads(results)
-    results = json.dumps(parsed, indent=4)
-
+      
 
     # Transform predictions to JSON
-    result = {
-        'output': results
-        }
-
-    resultjson = json.dumps(result)
+    resultjson = json.dumps(parsed, indent=4)
     return flask.Response(response=resultjson, status=200, mimetype='application/json')
